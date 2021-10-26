@@ -2,8 +2,9 @@
 #define SESSION_H
 
 #include "libs.h"
+#include "action.h"
 
-class session : public std::enable_shared_from_this<session>
+class session : public std::enable_shared_from_this<session>, public action
 {
 public:
   session(tcp::socket socket, boost::asio::io_service& io_service_);
@@ -22,8 +23,6 @@ private:
 	void log_in();
 
 	void do_write(const char *data_send, std::size_t length);
-
-	void feed_back();
 
   	tcp::socket socket_;
   	enum { max_length = 1024 };

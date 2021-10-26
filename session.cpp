@@ -9,7 +9,6 @@ session::session(tcp::socket socket, boost::asio::io_service& io_service_)
 void session::start()
   {
 	log_in();
-    //do_read();
   }
 
 void session::check_deadline()
@@ -17,7 +16,7 @@ void session::check_deadline()
     if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
     {
 	std::cout<<"socket delete\n";
-      socket_.close();
+      	socket_.close();
       //deadline_.expires_at(boost::posix_time::pos_infin);//
     }
 
@@ -37,8 +36,11 @@ void session::do_read()
 	  deadline_.cancel();
           if (!ec)
           {
-		feed_back();
-            //do_write(max_length);//length);
+		std::string buf_s(data_);
+
+		do_write(feed_back(buf_s).c_str(), max_length);
+		//feed_back();
+            	//do_write(max_length);//length);
           }
 	else{
 		std::cout<<"exit\n";	
@@ -52,7 +54,7 @@ void session::stop()
     boost::system::error_code ignored_ec;
     socket_.close(ignored_ec);
     deadline_.cancel();
-   std::cout<<"socket delete\n";
+    std::cout<<"socket delete\n";
   }
 
 
@@ -69,7 +71,15 @@ void session::log_in()
 		  deadline_.cancel();
 		  if (!ec)
 		  {
-			//std::cout<<"log: "<<data_<<" end\n";
+			std::string buf_s(data_);
+			if(log_in_body(buf_s)){
+				do_write(buf_s.c_str(), max_length);
+			}
+			else{
+				std::cout<<"1exit\n";
+			}
+			/*
+
 			std::string bufS(data_);
 			if(bufS.find("root 1234") == 0){
 				int iter = bufS.find(" ");
@@ -77,18 +87,22 @@ void session::log_in()
 				password = bufS.substr(iter + 1, bufS.find(" "));
 
 				std::cout<<"login:"<<login<<"\npassword:"<<password<<"\n";	
-
-				feed_back();
+				
+				do_write();
+				//do_read();
+				//feed_back();
 			}
 			else{
-				std::cout<<"1exit\n";			
+							
 			}
+			*/
 			
-		    //do_write(max_length);//length);
+		    	//do_write(max_length);//length);
 		  }
 		else{
 			std::cout<<"2exit\n";	
 		}
+		
 		});
   }
 
@@ -100,7 +114,7 @@ void session::log_in()
         {
           if (!ec)
           {
-            do_read();
+		do_read();
           }
 	else{
 		std::cout<<"exit\n";
@@ -109,7 +123,7 @@ void session::log_in()
         });
   }
 
-
+/*
 void session::feed_back(){
 	std::string bufS(data_), sendS = "";
 	sendS.resize(max_length);
@@ -146,3 +160,4 @@ void session::feed_back(){
 	sendS.insert(0, bufS);
 	do_write(sendS.c_str(), max_length);
 }
+*/
