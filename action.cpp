@@ -8,7 +8,7 @@ bool action::log_in_body(std::string &buf_s){
 	mtx.lock();	
 	//std::this_thread::sleep_for(std::chrono::seconds(20));
 	
-	std::ifstream file("users.txt");
+	std::ifstream file("files/users.txt");
 
 	if (!file.is_open()){
 		mtx.unlock();
