@@ -1,21 +1,39 @@
-#include "action.h"
+#include"action.h"
+#include<iostream>
 
 action::action(){
 }
 
 bool action::log_in_body(std::string &buf_s){	
+	mtx.lock();	
+	//std::this_thread::sleep_for(std::chrono::seconds(20));
 	
-	int iter = buf_s.find(" ");
+	std::ifstream file("users.txt");
 
-	this->login = buf_s.substr(0, iter);
-	this->password = buf_s.substr(iter + 1, buf_s.find(" "));
-	
-	if( (this->login == "root")&&(this->password == "1234") ){
-		buf_s.clear();
-		buf_s.resize(max_length);
-		buf_s.insert(0, "success");
-		return true;	
+	if (!file.is_open()){
+		mtx.unlock();
+		return false;
 	}
+
+	std::string line = "";
+	while(std::getline(file, line)){
+		if(buf_s.find(line) != -1){
+			file.close();
+			
+			int iter = line.find(" ");
+			this->login = line.substr(0, iter);
+			this->password = line.substr(iter + 1, line.find(" "));
+			
+			buf_s.clear();
+			buf_s.resize(max_length);
+			buf_s.insert(0, "success");
+			
+			mtx.unlock();
+			return true;
+		}
+	}
+	file.close();	
+	mtx.unlock();
 	return false;
 }
 
@@ -65,4 +83,6 @@ std::string action::com_gvlogn(std::string buf_s){
 std::string action::com_gvpass(std::string buf_s){
 	return this->password;
 }
+
+
 

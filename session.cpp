@@ -3,7 +3,7 @@
 session::session(tcp::socket socket, boost::asio::io_service& io_service_)
     : socket_(std::move(socket)), deadline_(io_service_)//, deadline_(socket_.get_io_service())
   {
-	timeout = 20;
+	timeout = 120;
   }
 
 void session::start()
