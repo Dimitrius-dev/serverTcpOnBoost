@@ -25,8 +25,6 @@ protected:
 	std::string com_gvpass(std::string buf_s);
 	std::string com_gvlogn(std::string buf_s);
 
-	int max_length = 1024;
-
 	std::mutex mtx;
 };
 

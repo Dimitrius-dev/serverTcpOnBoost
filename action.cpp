@@ -24,9 +24,7 @@ bool action::log_in_body(std::string &buf_s){
 			this->login = line.substr(0, iter);
 			this->password = line.substr(iter + 1, line.find(" "));
 			
-			buf_s.clear();
-			buf_s.resize(max_length);
-			buf_s.insert(0, "success");
+			buf_s = "success\n";
 			
 			mtx.unlock();
 			return true;
@@ -41,28 +39,23 @@ bool action::log_in_body(std::string &buf_s){
 
 std::string action::feed_back(std::string buf_s){
 
-	std::string send_s = "";
-	send_s.resize(max_length);
+	//std::string send_s = "";
+	//send_s.resize(max_length);
 
 //------------------------------------------commands:
 
 	if(!buf_s.find("help")){
-		send_s.insert(0, com_help(buf_s));
-		return send_s;
+		return com_help(buf_s);
 	}
 	if(!buf_s.find("gvlogn")){
-		send_s.insert(0, com_gvlogn(buf_s));
-		return send_s;
+		return com_gvlogn(buf_s);
 	}
 	if(!buf_s.find("gvpass")){
-		send_s.insert(0, com_gvpass(buf_s));
-		return send_s;
+		return com_gvpass(buf_s);
 	}
 
 //------------------------------------------default:
-	buf_s = "no command";
-	send_s.insert(0, buf_s);
-	return send_s;
+	return "no command\n";
 }
 
 

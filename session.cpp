@@ -30,15 +30,16 @@ void session::do_read()
 	deadline_.async_wait(boost::bind(&session::check_deadline, this));
 
     auto self(shared_from_this());
-    socket_.async_read_some(boost::asio::buffer(data_, max_length),
+    socket_.async_read_some(boost::asio::buffer(data_),//, max_length
         [this, self](boost::system::error_code ec, std::size_t length)
         {
 	  deadline_.cancel();
           if (!ec)
           {
 		std::string buf_s(data_);
-
-		do_write(feed_back(buf_s).c_str(), max_length);
+	
+		buf_s = feed_back(buf_s);
+		do_write(buf_s.c_str(), buf_s.length());
 		//feed_back();
             	//do_write(max_length);//length);
           }
@@ -65,7 +66,7 @@ void session::log_in()
 	deadline_.async_wait(boost::bind(&session::check_deadline, this));
 
 	auto self(shared_from_this());
-	socket_.async_read_some(boost::asio::buffer(data_, max_length),
+	socket_.async_read_some(boost::asio::buffer(data_),//, max_length
 		[this, self](boost::system::error_code ec, std::size_t length)
 		{
 		  deadline_.cancel();
@@ -73,10 +74,10 @@ void session::log_in()
 		  {
 			std::string buf_s(data_);
 			if(log_in_body(buf_s)){
-				do_write(buf_s.c_str(), max_length);
+				do_write(buf_s.c_str(), buf_s.length());
 			}
 			else{
-				std::cout<<"1exit\n";
+				std::cout<<"exit\n";
 			}
 			/*
 
