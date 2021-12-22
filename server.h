@@ -2,6 +2,8 @@
 #define SERVER_H
 
 #include "session.h"
+//#include <list>
+#include "context.h"
 
 using boost::asio::ip::tcp;
 
@@ -17,6 +19,8 @@ private:
   tcp::socket socket_;
 
   boost::asio::io_service& io_service_;
+
+  context context_; 
 };
 
 

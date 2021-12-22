@@ -3,34 +3,48 @@
 
 #include "libs.h"
 #include "action.h"
+#include "context.h"
 
 class session : public std::enable_shared_from_this<session>, public action
 {
 public:
-  session(tcp::socket socket, boost::asio::io_service& io_service_);
+  session(tcp::socket socket, boost::asio::io_service& io_service_, context& context_);
 
 	void start();
 
 private:
 	boost::asio::deadline_timer deadline_;
 
+	context context_use;
+
 	void check_deadline();
 
 	void do_read();
-
-	void stop();
 
 	void log_in();
 
 	void do_write(const char *data_send, std::size_t length);
 
+	void stop();	
+
   	tcp::socket socket_;
-  	enum { max_length = 1024 };
+
+	enum { msg_length = 512 };
+
+	char data_[msg_length];
+	std::string data_s = "";
+
+
+
 	std::string login = "";
 	std::string password = ""; 
-  	char data_[max_length];
+  	
 	
 	int timeout;
+
+	std::string flag_stop = "\r\n\r\n";
+
+	
 };
 
 #endif

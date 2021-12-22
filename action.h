@@ -12,9 +12,9 @@ class action
 protected:
 	action();
 
-	bool log_in_body(std::string &buf_s);//?
+	bool log_in_action(std::string &buf_s);//?
 
-	std::string feed_back(std::string buf_s);
+	int feed_back(std::string& buf_s);
 
 protected:
 	std::string login = "";
@@ -26,6 +26,13 @@ protected:
 	std::string com_gvlogn(std::string buf_s);
 
 	std::mutex mtx;
+
+	enum mode{
+		COMMAND = 0,
+		FILE
+	};
+
+	int current_mode = COMMAND; 
 };
 
 

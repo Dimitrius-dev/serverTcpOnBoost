@@ -1,14 +1,17 @@
 #include "session.h"
 
-session::session(tcp::socket socket, boost::asio::io_service& io_service_)
-    : socket_(std::move(socket)), deadline_(io_service_)//, deadline_(socket_.get_io_service())
+session::session(tcp::socket socket, boost::asio::io_service& io_service_, context& context_)
+    : socket_(std::move(socket)), deadline_(io_service_), context_use(context_)//, deadline_(socket_.get_io_service())
   {
-	timeout = 120;
+	timeout = 120;//120 seconds
   }
 
 void session::start()
   {
-	log_in();
+	//std::cout<<"special message: "<<context_use.getBuf()<<'\n';
+	
+	//log_in_header();
+	do_read();
   }
 
 void session::check_deadline()
@@ -24,30 +27,53 @@ void session::check_deadline()
     //deadline_.async_wait(boost::bind(&client::check_deadline, this));
   }
 
+
+//-----------------------------------------------------
+
+
 void session::do_read()
   {
 	deadline_.expires_from_now(boost::posix_time::seconds(timeout));
 	deadline_.async_wait(boost::bind(&session::check_deadline, this));
 
-    auto self(shared_from_this());
-    socket_.async_read_some(boost::asio::buffer(data_),//, max_length
-        [this, self](boost::system::error_code ec, std::size_t length)
-        {
-	  deadline_.cancel();
-          if (!ec)
-          {
-		std::string buf_s(data_);
-	
-		buf_s = feed_back(buf_s);
-		do_write(buf_s.c_str(), buf_s.length());
-		//feed_back();
-            	//do_write(max_length);//length);
-          }
-	else{
-		std::cout<<"exit\n";	
-	}
+	auto self(shared_from_this());
+	socket_.async_read_some(boost::asio::buffer(data_, msg_length),//, max_length
+	        [this, self](boost::system::error_code ec, std::size_t){
+
+		deadline_.cancel();
+		if (!ec){
+			//editable part begin
+			
+			std::string buf_s(data_);
+			data_s.append(buf_s);
+						
+			if(buf_s.find(flag_stop) != std::string::npos){
+				std::cout<<"message: "<<data_s;
+
+				switch(current_mode){
+					default:
+						break;
+					case COMMAND:
+						current_mode = feed_back(data_s);
+						break;
+					case FILE:
+						break;
+				}
+
+				do_write(data_s.c_str(), data_s.length());
+				data_s.clear();			
+			}
+			else{ 
+				do_read();
+			}			
+
+			//editable part end
+		}
+		else{
+			std::cout<<"exit\n";	
+		}
         });
-  }
+}
 
 
 void session::stop()
@@ -62,43 +88,25 @@ void session::stop()
 
 void session::log_in()
   {
-	deadline_.expires_from_now(boost::posix_time::seconds(timeout));
+	deadline_.expires_from_now(boost::posix_time::seconds(timeout));////////////////////////
 	deadline_.async_wait(boost::bind(&session::check_deadline, this));
 
 	auto self(shared_from_this());
 	socket_.async_read_some(boost::asio::buffer(data_),//, max_length
-		[this, self](boost::system::error_code ec, std::size_t length)
+		[this, self](boost::system::error_code ec, std::size_t)
 		{
 		  deadline_.cancel();
 		  if (!ec)
 		  {
+			//editable part begin
 			std::string buf_s(data_);
-			if(log_in_body(buf_s)){
+			if(log_in_action(buf_s)){
 				do_write(buf_s.c_str(), buf_s.length());
 			}
 			else{
 				std::cout<<"exit\n";
 			}
-			/*
-
-			std::string bufS(data_);
-			if(bufS.find("root 1234") == 0){
-				int iter = bufS.find(" ");
-				login = bufS.substr(0, iter);
-				password = bufS.substr(iter + 1, bufS.find(" "));
-
-				std::cout<<"login:"<<login<<"\npassword:"<<password<<"\n";	
-				
-				do_write();
-				//do_read();
-				//feed_back();
-			}
-			else{
-							
-			}
-			*/
-			
-		    	//do_write(max_length);//length);
+			//editable part end
 		  }
 		else{
 			std::cout<<"2exit\n";	
@@ -115,14 +123,21 @@ void session::log_in()
         {
           if (!ec)
           {
+		//editable part begin
+
 		do_read();
+
+		//editable part end
           }
 	else{
 		std::cout<<"exit\n";
 	}
 		
         });
-  }
+}
+
+
+
 
 /*
 void session::feed_back(){

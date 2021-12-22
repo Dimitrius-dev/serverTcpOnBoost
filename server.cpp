@@ -13,11 +13,13 @@ void server::do_accept()
         {
           if (!ec)
           {
+
 		std::cout<<"connected\n";
-            std::make_shared<session>(std::move(socket_), io_service_)->start();
+            std::make_shared<session>(std::move(socket_), io_service_, context_)->start();
           }
 
           do_accept();
         });
 }
+
 

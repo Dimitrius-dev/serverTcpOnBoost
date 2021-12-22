@@ -4,7 +4,7 @@
 action::action(){
 }
 
-bool action::log_in_body(std::string &buf_s){	
+bool action::log_in_action(std::string& buf_s){	
 	mtx.lock();	
 	//std::this_thread::sleep_for(std::chrono::seconds(20));
 	
@@ -37,25 +37,29 @@ bool action::log_in_body(std::string &buf_s){
 
 
 
-std::string action::feed_back(std::string buf_s){
+int action::feed_back(std::string& buf_s){
 
 	//std::string send_s = "";
 	//send_s.resize(max_length);
 
 //------------------------------------------commands:
 
-	if(!buf_s.find("help")){
-		return com_help(buf_s);
+	if(buf_s.find("help") != std::string::npos){
+		buf_s =  com_help(buf_s);
+		return COMMAND;
 	}
-	if(!buf_s.find("gvlogn")){
-		return com_gvlogn(buf_s);
+	if(buf_s.find("gvlogn") != std::string::npos){
+		buf_s = com_gvlogn(buf_s);
+		return COMMAND;
 	}
-	if(!buf_s.find("gvpass")){
-		return com_gvpass(buf_s);
+	if(buf_s.find("gvpass") != std::string::npos){
+		buf_s = com_gvpass(buf_s);
+		return COMMAND;
 	}
 
 //------------------------------------------default:
-	return "no command\n";
+	buf_s = "no command\n";
+	return COMMAND;
 }
 
 
