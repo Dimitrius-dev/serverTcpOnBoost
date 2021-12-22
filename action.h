@@ -6,8 +6,10 @@
 #include<chrono>
 #include<thread>
 #include<fstream>
+//#include<algorithm>
 
 #include "sql.h"
+#include "ftransfer.h"
 
 class action
 {
@@ -19,6 +21,8 @@ protected:
 	int log_from_bd(std::string& buf_s);
 
 	int feed_back(std::string& buf_s);
+
+	int file_send(std::string& buf_s);
 
 protected:
 	std::string login = "";
@@ -38,7 +42,7 @@ protected:
 		DISCONNECT
 	};
 
-	int current_mode = LOGIN; 
+	int next_mode = LOGIN; 
 };
 
 

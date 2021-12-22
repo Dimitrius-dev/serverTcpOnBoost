@@ -11,6 +11,15 @@ void session::start()
 	//std::cout<<"special message: "<<context_use.getBuf()<<'\n';
 	
 	//log_in_header();
+
+/*
+	std::cout<<"debug-----\n";
+	std::cout<<"data_: "<<data_<<"\n";
+	std::cout<<"data_s: "<<data_s<<"\n";
+	std::cout<<"----------\n";	
+*/
+	memset(data_,' ', msg_length);
+
 	do_read();
   }
 
@@ -18,6 +27,8 @@ void session::check_deadline()
   {
     if (deadline_.expires_at() <= boost::asio::deadline_timer::traits_type::now())
     {
+	data_s.clear();	
+	
 	std::cout<<"socket delete\n";
       	socket_.close();
       //deadline_.expires_at(boost::posix_time::pos_infin);//
@@ -44,34 +55,44 @@ void session::do_read()
 		if (!ec){
 			//editable part begin
 			
-			std::string buf_s(data_);
+			std::string buf_s = "";
+			
+			buf_s.assign(data_, msg_length);
+			memset(data_,' ', msg_length);	
+	
 			data_s.append(buf_s);
-						
-			if(buf_s.find(flag_stop) != std::string::npos){
-				//std::cout<<"message: "<<data_s;
 
-				switch(current_mode){
+
+			if(buf_s.find(flag_stop) != std::string::npos){
+
+				norm_buf(data_s);				
+				
+				std::cout<<"message: !"<<data_s<<"!\n";
+				std::cout<<"length of message: !"<<data_s.length()<<"!\n";
+				
+				std::cout<<"end\n";//-------------------------fesfsef
+
+				switch(next_mode){
 					default:
 						break;
 					case LOGIN:
-						current_mode = log_from_bd(data_s);
+						next_mode = log_from_bd(data_s);
 						break;
 					case COMMAND:
-						current_mode = feed_back(data_s);
+						next_mode = feed_back(data_s);
 						break;
 					case FILE:
+						next_mode = file_send(data_s);
 						break;
 				}
 				
-				if(current_mode != DISCONNECT){
+				if(next_mode != DISCONNECT){
 					do_write(data_s.c_str(), data_s.length());
 				}
 				else{
 					std::cout<<"3exit\n";				
 				}
-
-				
-				data_s.clear();			
+		
 			}
 			else{ 
 				do_read();
@@ -83,6 +104,37 @@ void session::do_read()
 			std::cout<<"exit\n";	
 		}
         });
+}
+
+
+void session::norm_buf(std::string& data_s){
+	if( (data_s[data_s.length() - 1] != ' ') && (data_s[data_s.length() - 1] != '\n') && (data_s[data_s.length() - 1] != '\r') ){
+		data_s.append(" ");
+	}
+
+	int st = 0;
+	int end = 0;
+	bool first = true;
+	for(int i = 0; i<data_s.length(); i++){
+		
+		if( (data_s[i] == ' ') || (data_s[i] == '\n') || (data_s[i] == '\r') ){			
+			if(first){
+				st = i;
+				first = false;
+			}
+			if( i != (data_s.length() - 1) ){
+				continue;
+			}		
+		}
+		if(!first){
+			end = i;
+			if((end - st) > 1){
+				std::cout<<"st = "<<st<<" end = "<<end<<'\n';
+				data_s.erase(data_s.begin() + st, data_s.begin() + end);
+			}
+			first = true;	
+		}
+	}
 }
 
 
@@ -134,7 +186,7 @@ void session::log_in()//maybe useless
           if (!ec)
           {
 		//editable part begin
-
+		data_s.clear();
 		do_read();
 
 		//editable part end

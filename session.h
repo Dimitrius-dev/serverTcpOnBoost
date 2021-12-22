@@ -4,6 +4,7 @@
 #include "libs.h"
 #include "action.h"
 #include "context.h"
+#include "iostream"
 
 class session : public std::enable_shared_from_this<session>, public action
 {
@@ -25,7 +26,7 @@ private:
 
 	void do_write(const char *data_send, std::size_t length);
 
-	void stop();	
+	void stop();
 
   	tcp::socket socket_;
 
@@ -43,6 +44,9 @@ private:
 	int timeout;
 
 	std::string flag_stop = "\r\n\r\n";
+
+private:
+	void norm_buf(std::string& data_s);
 
 	
 };
