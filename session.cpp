@@ -48,10 +48,13 @@ void session::do_read()
 			data_s.append(buf_s);
 						
 			if(buf_s.find(flag_stop) != std::string::npos){
-				std::cout<<"message: "<<data_s;
+				//std::cout<<"message: "<<data_s;
 
 				switch(current_mode){
 					default:
+						break;
+					case LOGIN:
+						current_mode = log_from_bd(data_s);
 						break;
 					case COMMAND:
 						current_mode = feed_back(data_s);
@@ -59,8 +62,15 @@ void session::do_read()
 					case FILE:
 						break;
 				}
+				
+				if(current_mode != DISCONNECT){
+					do_write(data_s.c_str(), data_s.length());
+				}
+				else{
+					std::cout<<"3exit\n";				
+				}
 
-				do_write(data_s.c_str(), data_s.length());
+				
 				data_s.clear();			
 			}
 			else{ 
@@ -86,7 +96,7 @@ void session::stop()
 
 
 
-void session::log_in()
+void session::log_in()//maybe useless
   {
 	deadline_.expires_from_now(boost::posix_time::seconds(timeout));////////////////////////
 	deadline_.async_wait(boost::bind(&session::check_deadline, this));

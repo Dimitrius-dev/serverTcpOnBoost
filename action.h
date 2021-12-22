@@ -7,12 +7,16 @@
 #include<thread>
 #include<fstream>
 
+#include "sql.h"
+
 class action
 {
 protected:
 	action();
 
 	bool log_in_action(std::string &buf_s);//?
+
+	int log_from_bd(std::string& buf_s);
 
 	int feed_back(std::string& buf_s);
 
@@ -28,11 +32,13 @@ protected:
 	std::mutex mtx;
 
 	enum mode{
-		COMMAND = 0,
-		FILE
+		LOGIN = 0,
+		COMMAND,
+		FILE,
+		DISCONNECT
 	};
 
-	int current_mode = COMMAND; 
+	int current_mode = LOGIN; 
 };
 
 

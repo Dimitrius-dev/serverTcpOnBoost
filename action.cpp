@@ -35,6 +35,28 @@ bool action::log_in_action(std::string& buf_s){
 	return false;
 }
 
+int action::log_from_bd(std::string& buf_s){
+	sql sql_;
+	std::string name = "";
+	std::string password = "";
+	
+	int iter = buf_s.find(" ");
+	name = buf_s.substr(0,iter);	
+	password = buf_s.substr(iter+1, buf_s.length()-9);
+	
+	//std::cout<<"name: "<<name<<" password: "<<password<<"=\n";
+	
+	//std::cout<<"sql_password"<<sql_.get_password(name);
+
+	if( password == sql_.get_password(name) ){
+		buf_s = "success\n";
+		return COMMAND;
+	}
+	else{
+		return DISCONNECT;	
+	}
+}
+
 
 
 int action::feed_back(std::string& buf_s){
